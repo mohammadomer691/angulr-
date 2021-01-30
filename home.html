@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="Description" content="Enter your description here" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <!-- Angular Script -->
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.0/angular.min.js"></script>
+    <title>Angular JS CRUD API</title>
+    <style>
+        .jumbotron {
+            background-color: rgba(73, 104, 105, 0.486);
+        }
+    </style>
+</head>
+
+<body ng-app="myApp" ng-controller="myCont">
+    <div class="container" ng-init="retrieve(); btnName='SAVE'">
+        <div class="jumbotron">
+            <h3 class="text-center">Angular and PHP based Application Programming Interface</h3>
+        </div>
+        <div class="col-8 offset-2">
+            <div class="form-group">
+                <label for="name">Name: </label>
+                <input type="text" class="form-control form-control-sm" ng-model="nameTxt" placeholder="Enter your name (e.g. Ali)">
+            </div>
+
+            <div class="form-group">
+                <label for="name">Age: </label>
+                <input type="text" class="form-control form-control-sm" ng-model="ageTxt" placeholder="Enter your age (e.g. 23)">
+            </div>
+
+            <div class="form-group">
+                <label for="name">Phone: </label>
+                <input type="text" class="form-control form-control-sm" ng-model="phoneTxt" placeholder="Enter number (e.g. 0900-78601)">
+            </div>
+
+            <div class="form-group">
+                <input type="button" class="btn btn-dark btn-sm col-12" value="{{btnName}}" ng-click="insert()">
+            </div>
+            <p class="text-center alert alert-dark">{{ message }}</p>
+            <hr />
+            <table class="table table-secondary table-bordered">
+                <thead>
+                    <th class="text-center text-uppercase">S. No</th>
+                    <th class="text-center text-uppercase">Name</th>
+                    <th class="text-center text-uppercase">Age</th>
+                    <th class="text-center text-uppercase">Phone</th>
+                    <th class="text-center text-uppercase" colspan="2">Actions</th>
+                </thead>
+
+                <tbody>
+                    <tr ng-repeat="x in myData">
+                        <td>{{ x.ID }}</td>
+                        <td>{{ x.Name }}</td>
+                        <td>{{ x.Age }}</td>
+                        <td>{{ x.Phone }}</td>
+                        <td class="text-center" colspan="2">
+                            <button class="btn btn-info" ng-click="edit(x.ID, x.Name, x.Age, x.Phone)">Edit</button>
+                            <button class="btn btn-danger" ng-click="delete(x.ID)">Delete</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script>
+        var app = angular.module("myApp", []);
+        app.controller("myCont", function($scope, $http) {
+            //Data Deletion Starts
+            $scope.delete = function(id) {
+                $http.post("delete.php", {
+                    'id': id
+                }).then(function($response) {
+                    $scope.message = $response.data.msg;
+                    console.log($scope.message);
+                    $scope.retrieve();
+                    $scope.nameTxt = "";
+                    $scope.ageTxt = "";
+                    $scope.phoneTxt = "";
+                });
+            };
+            //Data Deletion Ends
+            //Data Fetching For Updation Starts
+            $scope.edit = function(id, name, age, phone) {
+                $scope.nameTxt = name;
+                $scope.ageTxt = age;
+                $scope.phoneTxt = phone;
+                $scope.userID = id;
+                $scope.btnName = "UPDATE";
+            };
+            //Data Fetching For Updation Ends
+
+            $scope.insert = function() {
+                //Data Updation Starts
+                if ($scope.btnName == "UPDATE") {
+                    $http.post("update.php", {
+                        'id': $scope.userID,
+                        'name': $scope.nameTxt,
+                        'age': $scope.ageTxt,
+                        'phone': $scope.phoneTxt
+                    }).then(function($response) {
+                        $scope.message = $response.data.msg;
+                        $scope.nameTxt = "";
+                        $scope.ageTxt = "";
+                        $scope.phoneTxt = "";
+                        $scope.userID = 0;
+                        console.log($scope.message);
+                        $scope.retrieve();
+                    });
+                    //Data Updation Ends
+                } else {
+                    // Data Insertion Starts
+                    $http.post("insert.php", {
+                        'name': $scope.nameTxt,
+                        'age': $scope.ageTxt,
+                        'phone': $scope.phoneTxt
+                    }).then(function($response) {
+                        $scope.message = $response.data.msg;
+                        $scope.nameTxt = "";
+                        $scope.ageTxt = "";
+                        $scope.phoneTxt = "";
+                        console.log($scope.message);
+                        $scope.retrieve();
+                    });
+                    // Data Insertion Ends
+                }
+
+            };
+            // Data Retrieval Starts
+            $scope.retrieve = function() {
+                $http.get('select.php').then(function($response) {
+                    $scope.myData = $response.data;
+                    console.log("$scope.myData");
+                });
+            };
+        });
+        // Data Retrieval Ends
+    </script>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.1/umd/popper.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+
+</html>
